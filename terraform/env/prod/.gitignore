@@ -1,0 +1,23 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+
+# Keep example file
+!terraform.tfvars.example
+
+# Crash logs
+crash.log
+crash.*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local backup
+backup/
+
+# Environment
+.DS_Store

@@ -1,0 +1,77 @@
+# Dev Environment Terraform Variables - EXAMPLE FILE
+# =================================================
+# DO NOT COMMIT SECRETS! Use environment variables instead
+#
+# Usage:
+#   export TF_VAR_proxmox_api_token_secret="your-secret-here"
+#   export TF_VAR_vm_password="your-password-here"
+#   terraform plan
+
+# =============================================================================
+# PROXMOX CONNECTION
+# =============================================================================
+
+proxmox_api_url          = "https://your-proxmox-host:8006/api2/json"
+proxmox_api_token_id     = "root@pam!terraform"
+# proxmox_api_token_secret = set via TF_VAR_proxmox_api_token_secret env var
+
+proxmox_node             = "pve"
+proxmox_storage          = "local-lvm"
+
+# =============================================================================
+# VM CONFIGURATION
+# =============================================================================
+
+# Base VM ID (VMs will be created as base_id, base_id+1, base_id+2, base_id+3)
+proxmox_vm_id = 9000
+
+# Network Configuration - IP addresses (last octet only)
+prometheus_ip = "110"  # Full IP: 192.168.1.110
+elk_ip        = "111"  # Full IP: 192.168.1.111
+grafana_ip    = "112"  # Full IP: 192.168.1.112
+zabbix_ip     = "113"  # Full IP: 192.168.1.113
+
+# Monitoring network base (e.g., 192.168.1)
+monitoring_network = "192.168.1"
+
+# =============================================================================
+# SERVICE PORTS (optional - defaults provided)
+# =============================================================================
+
+# prometheus_port      = 9090
+# elasticsearch_port  = 9200
+# kibana_port         = 5601
+# logstash_port       = 5044
+# grafana_port        = 3000
+# zabbix_port         = 8080
+# zabbix_agent_port   = 10050
+
+# =============================================================================
+# NETWORK
+# =============================================================================
+
+network_bridge = "vmbr0"
+gateway        = "192.168.1.1"
+dns_servers    = ["192.168.1.1", "1.1.1.1"]
+
+# =============================================================================
+# SSH CONFIGURATION
+# =============================================================================
+
+proxmox_ssh_user = "root"
+# proxmox_ssh_password = set via TF_VAR_proxmox_ssh_password env var
+
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+ssh_username        = "ubuntu"
+
+# =============================================================================
+# SECURITY
+# =============================================================================
+
+# SSH Access (CIDR for firewall)
+allowed_ssh_cidr = "192.168.1.0/24"
+
+# Enable security features
+enable_firewall       = true
+enable_fail2ban       = true
+enable_auto_updates   = true

@@ -1,0 +1,65 @@
+# Production Environment Terraform Variables - EXAMPLE FILE
+# =================================================
+# DO NOT COMMIT SECRETS! Use environment variables instead
+#
+# Usage:
+#   export TF_VAR_proxmox_api_token_secret="your-secret-here"
+#   export TF_VAR_vm_password="your-secure-password-min-12-chars"
+#   terraform plan
+
+# =============================================================================
+# PROXMOX CONNECTION
+# =============================================================================
+
+proxmox_api_url          = "https://your-proxmox-host:8006/api2/json"
+proxmox_api_token_id     = "root@pam!terraform"
+# proxmox_api_token_secret = set via TF_VAR_proxmox_api_token_secret env var
+
+proxmox_node             = "pve"
+proxmox_storage          = "local-lvm"
+
+# =============================================================================
+# VM CONFIGURATION
+# =============================================================================
+
+# Base VM ID (VMs will be created as base_id, base_id+1, base_id+2, base_id+3)
+proxmox_vm_id = 8000
+
+# Network Configuration - IP addresses (last octet only)
+prometheus_ip = "20"  # Full IP: 192.168.1.20
+elk_ip        = "21"  # Full IP: 192.168.1.21
+grafana_ip    = "22"  # Full IP: 192.168.1.22
+zabbix_ip     = "23"  # Full IP: 192.168.1.23
+
+# Monitoring network base (e.g., 192.168.1)
+monitoring_network = "192.168.1"
+
+# =============================================================================
+# NETWORK
+# =============================================================================
+
+network_bridge = "vmbr0"
+gateway        = "192.168.1.1"
+dns_servers    = ["192.168.1.1", "1.1.1.1"]
+
+# =============================================================================
+# SSH CONFIGURATION
+# =============================================================================
+
+proxmox_ssh_user = "root"
+# proxmox_ssh_password = set via TF_VAR_proxmox_ssh_password env var
+
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+ssh_username        = "ubuntu"
+
+# =============================================================================
+# SECURITY
+# =============================================================================
+
+# SSH Access (CIDR for firewall)
+allowed_ssh_cidr = "10.0.0.0/8"
+
+# Enable security features
+enable_firewall       = true
+enable_fail2ban       = true
+enable_auto_updates   = true
