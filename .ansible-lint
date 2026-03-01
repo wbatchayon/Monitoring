@@ -1,0 +1,14 @@
+# .ansible-lint configuration file
+
+---
+profile: production
+
+# Skip certain checks if needed
+skip_list: []
+
+# Configure additional paths
+exclude_paths:
+  - .git
+  - .cache
+
+

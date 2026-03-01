@@ -1,0 +1,162 @@
+
+# Git Ignore - Monitoring Infrastructure Project
+
+# This file ensures sensitive data, build artifacts, and temporary files
+# are not accidentally committed to version control
+
+
+# TERRAFORM
+
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+terraform.tfvars
+terraform.tfvars.json
+!terraform.tfvars.example
+terraform.tfvars.example
+*.lock.hcl
+.terraform/
+terraform.tfstate.d/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+
+# ANSIBLE
+
+*.retry
+ansible.log
+*.vault
+*.vault.yml
+vault_password.yml
+vault_password_file
+!vault_password_file.example
+ansible/**/*.retry
+ansible/inventory/dynamic_*
+ansible/roles/**/__pycache__/
+ansible/group_vars/all/vault.yml.encrypted
+
+
+# ENVIRONMENT & CREDENTIALS
+
+.env
+.env.local
+*.local
+.vault_password_file
+.ansible_vault
+
+# Credentials & Secrets
+credentials/
+secrets/
+*.pem
+*.key
+*.pub
+id_rsa*
+id_ed25519*
+!*.pub.example
+known_hosts
+
+
+# BACKUPS & ARCHIVES
+
+backups/
+*.backup
+*.bak
+*.tar.gz
+*.tar
+*.zip
+*.7z
+*.rar
+
+
+# OS & EDITOR
+
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.cache/
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-*
+*.sublime-project
+
+# VI/VIM
+.netrwhist
+
+
+# LOGS & DEBUGGING
+
+*.log
+logs/
+/var/log/
+deployment.log
+terraform.log
+
+
+# TEMPORARY FILES
+
+tmp/
+temp/
+*.tmp
+*.temp
+*.bkp
+.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+
+
+# BUILD & DISTRIBUTION
+
+dist/
+build/
+*.egg-info/
+.eggs/
+
+
+# CI/CD - GitHub Actions
+
+.github/
+!.github/workflows/
+# Uncomment if using other CI systems:
+# .gitlab-ci.yml
+# .travis.yml
+# .circleci/
+
+
+# DEPLOYMENT & MANAGEMENT
+
+terraform_output.json
+deployment_output.txt
+ansible_output.txt
+
+
+# EXCEPTIONS - Files to keep despite patterns above
+
+!.gitkeep
+!.env.example
+!.vault_password_file.example
+!terraform/env/*/terraform.tfvars.example
+!README.md
+!Makefile
