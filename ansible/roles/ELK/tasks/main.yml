@@ -1,0 +1,195 @@
+---
+# ELK Stack Installation Tasks
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - wget
+      - gnupg2
+      - apt-transport-https
+      - ca-certificates
+      - lsb-release
+      - openjdk-17-jre-headless
+      - gpg
+    state: present
+  become: true
+
+- name: Download Elasticsearch GPG key
+  ansible.builtin.get_url:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    dest: /tmp/elasticsearch-key.gpg
+    mode: '0644'
+  become: true
+
+- name: Install Elasticsearch GPG key
+  ansible.builtin.command:
+    cmd: >-
+      gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+      /tmp/elasticsearch-key.gpg
+    creates: /usr/share/keyrings/elasticsearch-keyring.gpg
+  become: true
+
+- name: Ensure apt-transport-https is installed
+  ansible.builtin.apt:
+    name: apt-transport-https
+    state: present
+  become: true
+
+- name: Add Elasticsearch repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [arch=amd64 signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg]
+      https://artifacts.elastic.co/packages/8.x/apt stable main
+    state: present
+  become: true
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+
+- name: Install Elasticsearch
+  ansible.builtin.apt:
+    name: elasticsearch
+    state: present
+  become: true
+
+- name: Install Kibana
+  ansible.builtin.apt:
+    name: kibana
+    state: present
+  become: true
+
+- name: Install Logstash
+  ansible.builtin.apt:
+    name: logstash
+    state: present
+  become: true
+
+- name: Install Filebeat
+  ansible.builtin.apt:
+    name: filebeat
+    state: present
+  become: true
+
+- name: Configure Elasticsearch memory
+  ansible.builtin.lineinfile:
+    path: /etc/elasticsearch/jvm.options.d/jvm.options
+    line: "-Xms4g"
+    create: true
+    mode: '0644'
+  become: true
+
+- name: Configure Elasticsearch memory max
+  ansible.builtin.lineinfile:
+    path: /etc/elasticsearch/jvm.options.d/jvm.options
+    line: "-Xmx4g"
+    create: true
+    mode: '0644'
+  become: true
+
+- name: Deploy Elasticsearch configuration
+  ansible.builtin.template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    owner: elasticsearch
+    group: elasticsearch
+    mode: '0640'
+  become: true
+  notify: Restart Elasticsearch
+
+- name: Deploy Kibana configuration
+  ansible.builtin.template:
+    src: kibana.yml.j2
+    dest: /etc/kibana/kibana.yml
+    owner: kibana
+    group: kibana
+    mode: '0640'
+  become: true
+  notify: Restart Kibana
+
+- name: Deploy Logstash configuration
+  ansible.builtin.template:
+    src: logstash.conf.j2
+    dest: /etc/logstash/conf.d/logstash.conf
+    owner: root
+    group: logstash
+    mode: '0644'
+  become: true
+  notify: Restart Logstash
+
+- name: Enable and start Elasticsearch
+  ansible.builtin.systemd:
+    name: elasticsearch
+    enabled: true
+    state: started
+  become: true
+
+- name: Enable and start Kibana
+  ansible.builtin.systemd:
+    name: kibana
+    enabled: true
+    state: started
+  become: true
+
+- name: Enable and start Logstash
+  ansible.builtin.systemd:
+    name: logstash
+    enabled: true
+    state: started
+  become: true
+
+- name: Enable and start Filebeat
+  ansible.builtin.systemd:
+    name: filebeat
+    enabled: true
+    state: started
+  become: true
+
+- name: Open Elasticsearch port in firewall
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ monitoring_network }}"
+    port: "{{ elasticsearch_port }}"
+    proto: tcp
+  become: true
+  failed_when: false
+
+- name: Open Kibana port in firewall
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ monitoring_network }}"
+    port: "{{ kibana_port }}"
+    proto: tcp
+  become: true
+  failed_when: false
+
+- name: Open Logstash port in firewall
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ monitoring_network }}"
+    port: "{{ logstash_port }}"
+    proto: tcp
+  become: true
+  failed_when: false
+
+- name: Wait for Elasticsearch to start
+  ansible.builtin.wait_for:
+    port: "{{ elasticsearch_port }}"
+    delay: 10
+    timeout: 300
+  failed_when: false
+
+- name: Wait for Kibana to start
+  ansible.builtin.wait_for:
+    port: 5601
+    delay: 10
+    timeout: 300
+  failed_when: false

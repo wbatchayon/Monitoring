@@ -1,0 +1,8 @@
+---
+# Prometheus role handlers
+
+- name: Restart Prometheus
+  ansible.builtin.systemd:
+    name: prometheus
+    state: restarted
+  become: true

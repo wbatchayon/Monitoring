@@ -1,0 +1,41 @@
+---
+# Prometheus configuration template
+
+global:
+  scrape_interval: {{ prometheus_scrape_interval | default('15s') }}
+  evaluation_interval: {{ prometheus_evaluation_interval | default('15s') }}
+  scrape_timeout: {{ prometheus_scrape_timeout | default('10s') }}
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: {{ alertmanager_targets | default([]) }}
+
+rule_files:
+  - "{{ prometheus_config_dir }}/rules/*.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    honor_timestamps: true
+    static_configs:
+      - targets: ['localhost:{{ prometheus_port }}']
+
+  # Node Exporter
+  - job_name: 'node'
+    honor_timestamps: true
+    static_configs:
+      - targets: {{ node_exporter_targets | default(['localhost:9100']) }}
+
+  # ELK Stack monitoring
+  - job_name: 'elasticsearch'
+    honor_timestamps: true
+    static_configs:
+      - targets: ['{{ elk_ip | default("192.168.1.111") }}:9200']
+    scrape_interval: 30s
+
+  # Grafana monitoring
+  - job_name: 'grafana'
+    honor_timestamps: true
+    static_configs:
+      - targets: ['{{ grafana_ip | default("192.168.1.112") }}:3000']

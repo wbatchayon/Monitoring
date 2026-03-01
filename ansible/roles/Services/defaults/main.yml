@@ -1,0 +1,12 @@
+---
+# Services portal defaults
+
+prometheus_ip: "{{ lookup('env', 'PROMETHEUS_IP') | default('192.168.1.110') }}"
+elk_ip: "{{ lookup('env', 'ELK_IP') | default('192.168.1.111') }}"
+grafana_ip: "{{ lookup('env', 'GRAFANA_IP') | default('192.168.1.112') }}"
+zabbix_ip: "{{ lookup('env', 'ZABBIX_IP') | default('192.168.1.113') }}"
+
+network_cidr: "{{ lookup('env', 'MONITORING_NETWORK') | default('192.168.1.0/24') }}"
+
+portal_server_name: "_"
+portal_port: 80

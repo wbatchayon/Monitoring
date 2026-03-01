@@ -1,0 +1,22 @@
+---
+# Prometheus role default variables
+
+# Installation paths
+prometheus_user: prometheus
+prometheus_group: prometheus
+prometheus_home: /var/lib/prometheus
+prometheus_config_dir: /etc/prometheus
+
+# Retention
+prometheus_retention_time: "15d"
+
+# Scrape settings
+prometheus_scrape_interval: "15s"
+prometheus_evaluation_interval: "15s"
+
+# Exporters
+install_node_exporter: true
+install_pushgateway: true
+
+# Service targets
+alertmanager_targets: []

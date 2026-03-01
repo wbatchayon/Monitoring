@@ -1,0 +1,42 @@
+# Apache Configuration for Zabbix Frontend
+# Managed by Ansible
+
+<IfModule mod_alias.c>
+    Alias /zabbix /usr/share/zabbix
+</IfModule>
+
+<IfModule mod_php.c>
+    php_value max_execution_time 300
+    php_value memory_limit 128M
+    php_value post_max_size 16M
+    php_value upload_max_filesize 2M
+    php_value max_input_time 300
+    php_value max_input_vars 10000
+    php_value date.timezone Europe/Paris
+</IfModule>
+
+<Directory "/usr/share/zabbix">
+    Options -Indexes +FollowSymLinks
+    AllowOverride None
+    Require all granted
+
+    <FilesMatch \.php$>
+        SetHandler application/x-httpd-php
+    </FilesMatch>
+</Directory>
+
+<Directory "/usr/share/zabbix/conf">
+    Require all denied
+</Directory>
+
+<Directory "/usr/share/zabbix/app">
+    Require all denied
+</Directory>
+
+<Directory "/usr/share/zabbix/include">
+    Require all denied
+</Directory>
+
+<Directory "/usr/share/zabbix/local">
+    Require all denied
+</Directory>

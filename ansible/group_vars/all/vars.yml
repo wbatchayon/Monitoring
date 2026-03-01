@@ -1,0 +1,30 @@
+---
+# Ansible group variables - Centralized network configuration
+
+# SSH
+ssh_username: "ubuntu"
+
+# Network Configuration
+monitoring_network: "{{ lookup('env', 'MONITORING_NETWORK') | default('192.168.1.0/24') }}"
+gateway: "{{ lookup('env', 'GATEWAY') | default('192.168.1.1') }}"
+
+# Service IPs
+prometheus_ip: "{{ lookup('env', 'PROMETHEUS_IP') | default('192.168.1.110') }}"
+elk_ip: "{{ lookup('env', 'ELK_IP') | default('192.168.1.111') }}"
+grafana_ip: "{{ lookup('env', 'GRAFANA_IP') | default('192.168.1.112') }}"
+zabbix_ip: "{{ lookup('env', 'ZABBIX_IP') | default('192.168.1.113') }}"
+
+# Service Ports
+prometheus_port: "{{ lookup('env', 'PROMETHEUS_PORT') | default('9090') }}"
+node_exporter_port: "{{ lookup('env', 'NODE_EXPORTER_PORT') | default('9100') }}"
+pushgateway_port: "{{ lookup('env', 'PUSHGATEWAY_PORT') | default('9091') }}"
+elasticsearch_port: "{{ lookup('env', 'ELASTICSEARCH_PORT') | default('9200') }}"
+kibana_port: "{{ lookup('env', 'KIBANA_PORT') | default('5601') }}"
+logstash_port: "{{ lookup('env', 'LOGSTASH_PORT') | default('5044') }}"
+grafana_port: "{{ lookup('env', 'GRAFANA_PORT') | default('3000') }}"
+zabbix_port: "{{ lookup('env', 'ZABBIX_PORT') | default('8080') }}"
+zabbix_agent_port: "{{ lookup('env', 'ZABBIX_AGENT_PORT') | default('10050') }}"
+zabbix_server_port: "{{ lookup('env', 'ZABBIX_SERVER_PORT') | default('10051') }}"
+
+# Prometheus
+prometheus_retention: "15d"

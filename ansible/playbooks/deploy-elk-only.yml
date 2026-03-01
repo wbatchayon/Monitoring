@@ -1,0 +1,8 @@
+---
+# Deploy ELK Stack only
+
+- name: Deploy ELK Stack
+  hosts: elk
+  become: true
+  roles:
+    - ELK

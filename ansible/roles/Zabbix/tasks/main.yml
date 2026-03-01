@@ -1,0 +1,197 @@
+---
+# Zabbix 7.0 installation with PostgreSQL
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - apache2
+      - apache2-utils
+      - curl
+      - wget
+      - python3-psycopg2
+    state: present
+  become: true
+
+- name: Ensure PostgreSQL is started
+  ansible.builtin.systemd:
+    name: postgresql
+    state: started
+    enabled: true
+  become: true
+
+- name: Purge existing zabbix-release package
+  ansible.builtin.command:
+    cmd: "apt-get purge -y zabbix-release || true"
+  become: true
+  changed_when: true
+  failed_when: false
+
+- name: Download Zabbix release package
+  ansible.builtin.get_url:
+    url: https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_7.0-2+ubuntu24.04_all.deb
+    dest: /tmp/zabbix-release.deb
+    mode: '0644'
+  become: true
+
+- name: Install Zabbix release package
+  ansible.builtin.shell:
+    cmd: "DEBIAN_FRONTEND=noninteractive dpkg -i /tmp/zabbix-release.deb"
+  become: true
+  changed_when: true
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+
+- name: Install Zabbix server and frontend (PostgreSQL)
+  ansible.builtin.apt:
+    name:
+      - zabbix-server-pgsql
+      - zabbix-frontend-php
+      - zabbix-apache-conf
+      - zabbix-agent
+      - zabbix-sql-scripts
+    state: present
+  become: true
+
+- name: Create Zabbix PostgreSQL database
+  community.postgresql.postgresql_db:
+    name: "{{ zabbix_db_name | default('zabbix') }}"
+    encoding: UTF8
+    lc_collate: C
+    lc_ctype: C
+    template: template0
+    state: present
+  become: true
+  become_user: postgres
+
+- name: Create Zabbix PostgreSQL user
+  community.postgresql.postgresql_user:
+    name: "{{ zabbix_db_user | default('zabbix') }}"
+    password: "{{ zabbix_db_password | default('zabbix') }}"
+    state: present
+  become: true
+  become_user: postgres
+  no_log: true
+
+- name: Grant privileges on database to Zabbix user
+  community.postgresql.postgresql_privs:
+    database: "{{ zabbix_db_name | default('zabbix') }}"
+    role: "{{ zabbix_db_user | default('zabbix') }}"
+    privs: ALL
+    type: database
+    state: present
+  become: true
+  become_user: postgres
+
+- name: Allow zabbix user password authentication in pg_hba.conf
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/16/main/pg_hba.conf
+    line: "host    zabbix          zabbix          127.0.0.1/32            md5"
+    insertafter: "^# IPv4 local connections"
+    state: present
+  become: true
+  notify: Restart PostgreSQL
+
+- name: Reload PostgreSQL
+  ansible.builtin.systemd:
+    name: postgresql
+    state: reloaded
+  become: true
+
+- name: Check if schema already imported
+  ansible.builtin.command:
+    cmd: psql -U {{ zabbix_db_user | default('zabbix') }} -d {{ zabbix_db_name | default('zabbix') }} -c "SELECT COUNT(*) FROM hosts;" 2>/dev/null
+  become: true
+  become_user: postgres
+  register: schema_check
+  failed_when: false
+  changed_when: false
+
+- name: Import Zabbix SQL schema
+  ansible.builtin.shell:
+    cmd: "zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | psql -U postgres -d {{ zabbix_db_name | default('zabbix') }}"
+  become: true
+  become_user: postgres
+  when: schema_check.rc != 0
+  changed_when: true
+
+- name: Deploy Zabbix server configuration
+  ansible.builtin.template:
+    src: zabbix_server.conf.j2
+    dest: /etc/zabbix/zabbix_server.conf
+    owner: zabbix
+    group: zabbix
+    mode: '0640'
+    force: true
+  become: true
+  notify: Restart Zabbix Server
+
+- name: Deploy Zabbix agent configuration
+  ansible.builtin.template:
+    src: zabbix_agentd.conf.j2
+    dest: /etc/zabbix/zabbix_agentd.conf
+    owner: root
+    group: root
+    mode: '0644'
+    force: true
+  become: true
+  notify: Restart Zabbix Agent
+
+- name: Deploy Apache configuration for Zabbix
+  ansible.builtin.template:
+    src: zabbix.conf.j2
+    dest: /etc/apache2/conf-available/zabbix.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: Restart Zabbix Frontend
+
+- name: Enable Zabbix Apache configuration
+  ansible.builtin.shell: a2enconf zabbix.conf || true
+  become: true
+  failed_when: false
+  changed_when: true
+
+- name: Enable and start services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  loop:
+    - postgresql
+    - zabbix-server
+    - zabbix-agent
+    - apache2
+  become: true
+
+- name: Open Zabbix ports in firewall
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ monitoring_network }}"
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "{{ zabbix_port }}"
+    - "{{ zabbix_agent_port }}"
+    - "{{ zabbix_server_port }}"
+  become: true
+  failed_when: false
+
+- name: Wait for Zabbix to start
+  ansible.builtin.wait_for:
+    port: "{{ zabbix_port }}"
+    delay: 10
+    timeout: 120
+  failed_when: false

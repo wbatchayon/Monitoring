@@ -1,0 +1,12 @@
+---
+# ansible/playbooks/deploy-services-portal.yml
+# Playbook to deploy the Infrastructure Services Portal
+
+- name: Deploy Infrastructure Services Portal
+  hosts: all
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  roles:
+    - Services

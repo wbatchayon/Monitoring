@@ -1,0 +1,13 @@
+# Kibana Configuration
+# Managed by Ansible
+
+server.host: "0.0.0.0"
+server.port: 5601
+
+elasticsearch.hosts: ["http://localhost:9200"]
+
+# Elasticsearch request timeout
+elasticsearch.requestTimeout: 60000
+
+# Enable optimizations
+csp.strict: false

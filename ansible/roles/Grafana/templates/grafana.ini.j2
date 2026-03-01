@@ -1,0 +1,55 @@
+# Grafana Configuration
+# Managed by Ansible
+
+[server]
+protocol = http
+http_addr = 0.0.0.0
+http_port = 3000
+domain = {{ domain | default('monitoring.local') }}
+root_url = %(protocol)s://%(domain)s:%(http_port)s/
+
+[database]
+type = sqlite3
+path = /var/lib/grafana/grafana.db
+
+[session]
+provider = file
+
+[analytics]
+reporting_enabled = false
+check_for_updates = false
+
+[security]
+admin_user = admin
+admin_password = {{ grafana_admin_password | default('admin') }}
+disable_gravatar = true
+
+[users]
+allow_sign_up = false
+allow_org_create = false
+auto_assign_org = true
+auto_assign_org_role = Viewer
+
+[auth.anonymous]
+enabled = false
+
+[log]
+mode = console
+level = info
+
+[log.console]
+level = info
+format = text
+
+[alerting]
+enabled = false
+execute_alerts = false
+
+[unified_alerting]
+enabled = true
+
+[paths]
+data = /var/lib/grafana
+logs = /var/log/grafana
+plugins = /var/lib/grafana/plugins
+provisioning = /etc/grafana/provisioning

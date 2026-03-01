@@ -1,0 +1,37 @@
+---
+# Main Playbook to Deploy Monitoring Stack
+
+# Deploy Common security and base configuration
+- name: Common setup for all monitoring hosts
+  hosts: monitoring
+  become: true
+  roles:
+    - Common
+
+# Deploy Prometheus
+- name: Deploy Prometheus
+  hosts: prometheus
+  become: true
+  roles:
+    - Prometheus
+
+# Deploy ELK Stack
+- name: Deploy ELK Stack
+  hosts: elk
+  become: true
+  roles:
+    - ELK
+
+# Deploy Grafana
+- name: Deploy Grafana
+  hosts: grafana
+  become: true
+  roles:
+    - Grafana
+
+# Deploy Zabbix
+- name: Deploy Zabbix
+  hosts: zabbix
+  become: true
+  roles:
+    - Zabbix

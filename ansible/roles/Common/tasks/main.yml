@@ -1,0 +1,134 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Install security packages
+  ansible.builtin.apt:
+    name:
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+      - prometheus-node-exporter
+    state: present
+  become: true
+
+- name: Configure SSH key-based auth
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+  become: true
+  no_log: true
+  notify: Restart SSH
+
+- name: Disable root login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin without-password'
+  become: true
+  notify: Restart SSH
+
+- name: Enable PubkeyAuthentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PubkeyAuthentication'
+    line: 'PubkeyAuthentication yes'
+  become: true
+  notify: Restart SSH
+
+- name: Disable X11Forwarding
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?X11Forwarding'
+    line: 'X11Forwarding no'
+  become: true
+  notify: Restart SSH
+
+- name: Set UFW default deny incoming
+  community.general.ufw:
+    state: enabled
+    policy: deny incoming
+  become: true
+  failed_when: false
+
+- name: Set UFW default allow outgoing
+  community.general.ufw:
+    state: enabled
+    policy: allow outgoing
+  become: true
+  failed_when: false
+
+- name: Allow SSH
+  community.general.ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+  become: true
+  failed_when: false
+
+- name: Allow Node Exporter
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ monitoring_network }}"
+    port: "{{ node_exporter_port }}"
+    proto: tcp
+  become: true
+  failed_when: false
+
+- name: Enable fail2ban
+  ansible.builtin.copy:
+    content: |
+      [sshd]
+      enabled = true
+      port = 22
+      filter = sshd
+      logpath = /var/log/auth.log
+      maxretry = 3
+      bantime = 3600
+    dest: /etc/fail2ban/jail.local
+    mode: '0644'
+  become: true
+  no_log: true
+  notify: Restart fail2ban
+  failed_when: false
+
+- name: Configure automatic updates
+  ansible.builtin.copy:
+    content: |
+      Unattended-Upgrade::Allowed-Origins {
+          "${distro_id}:${distro_codename}-security";
+      };
+      Unattended-Upgrade::Automatic-Reboot "true";
+      Unattended-Upgrade::Automatic-RebootTime "02:00";
+      Unattended-Upgrade::Remove-Unused-Dependencies "true";
+      Unattended-Upgrade::Update-Day "0";
+      Unattended-Upgrade::Update-Time "02:00";
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    mode: '0644'
+  become: true
+  failed_when: false
+
+- name: Enable unattended upgrades
+  ansible.builtin.lineinfile:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+    line: '{{ item }}'
+    create: true
+    mode: '0644'
+  become: true
+  with_items:
+    - 'APT::Periodic::Update-Package-Lists "1";'
+    - 'APT::Periodic::Download-Upgradeable-Packages "1";'
+    - 'APT::Periodic::AutocleanInterval "7";'
+    - 'APT::Periodic::Unattended-Upgrade "1";'
+  failed_when: false
+
+- name: Enable Node Exporter
+  ansible.builtin.systemd:
+    name: prometheus-node-exporter
+    enabled: true
+    state: started
+  become: true

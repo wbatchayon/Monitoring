@@ -1,0 +1,40 @@
+# Logstash Configuration
+# Managed by Ansible
+
+# Input from Beats (Filebeat)
+input {
+  beats {
+    port => 5044
+  }
+  
+  # Also accept syslog
+  syslog {
+    port => 514
+  }
+}
+
+# Filter configuration
+filter {
+  # Add metadata
+  mutate {
+    add_field => { "environment" => "{{ environment | default('production') }}" }
+  }
+  
+  # Parse date
+  date {
+    match => [ "timestamp", "ISO8601" ]
+  }
+}
+
+# Output to Elasticsearch
+output {
+  elasticsearch {
+    hosts => ["localhost:9200"]
+    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
+  }
+  
+  # Also output to stdout for debugging
+  stdout {
+    codec => rubydebug
+  }
+}

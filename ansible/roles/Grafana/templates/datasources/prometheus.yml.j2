@@ -1,0 +1,24 @@
+# Grafana Datasources
+# Managed by Ansible
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://{{ prometheus_ip | default('192.168.1.110') }}:9090
+    isDefault: true
+    editable: false
+    
+  - name: Elasticsearch
+    type: elasticsearch
+    access: proxy
+    url: http://{{ elk_ip | default('192.168.1.111') }}:9200
+    database: "filebeat-*"
+    editable: false
+    jsonData:
+      timeField: "@timestamp"
+      esVersion: 8
+      logMessageField: message
+      logLevelField: level

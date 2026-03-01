@@ -1,0 +1,8 @@
+---
+# Deploy Zabbix only
+
+- name: Deploy Zabbix
+  hosts: zabbix
+  become: true
+  roles:
+    - Zabbix

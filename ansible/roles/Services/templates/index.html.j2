@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure Monitoring Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #8892b0;
+            font-size: 1.1rem;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #fff;
+            display: block;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: #00d4ff;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+        
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .service-name {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+        
+        .service-description {
+            color: #8892b0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .service-url {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #00d4ff;
+        }
+        
+        .status-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        
+        .status-section h2 {
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Infrastructure Monitoring Portal</h1>
+            <p class="subtitle">Central access point for all monitoring services</p>
+        </header>
+        
+        <div class="services-grid">
+            <!-- Prometheus -->
+            <a href="http://{{ prometheus_ip }}:9090" class="service-card" target="_blank">
+                <div class="service-icon">📊</div>
+                <h3 class="service-name">Prometheus</h3>
+                <p class="service-description">
+                    Collecte et stockage des métriques time-series. 
+                    Permet de surveiller les performances et la disponibilité de l'infrastructure.
+                </p>
+                <span class="service-url">{{ prometheus_ip }}:9090</span>
+            </a>
+            
+            <!-- Elasticsearch -->
+            <a href="http://{{ elasticsearch_ip }}:9200" class="service-card" target="_blank">
+                <div class="service-icon">🔍</div>
+                <h3 class="service-name">Elasticsearch</h3>
+                <p class="service-description">
+                    Moteur de recherche et d'analyse pour les logs. 
+                    Indexe et stocke les données de logs de tous les services.
+                </p>
+                <span class="service-url">{{ elasticsearch_ip }}:9200</span>
+            </a>
+            
+            <!-- Kibana -->
+            <a href="http://{{ elasticsearch_ip }}:5601" class="service-card" target="_blank">
+                <div class="service-icon">📈</div>
+                <h3 class="service-name">Kibana</h3>
+                <p class="service-description">
+                    Interface de visualisation pour Elasticsearch.
+                    Créez des dashboards et analysez les logs en temps réel.
+                </p>
+                <span class="service-url">{{ elasticsearch_ip }}:5601</span>
+            </a>
+            
+            <!-- Grafana -->
+            <a href="http://{{ grafana_ip }}:3000" class="service-card" target="_blank">
+                <div class="service-icon">📉</div>
+                <h3 class="service-name">Grafana</h3>
+                <p class="service-description">
+                    Plateforme de visualisation et de tableaux de bord.
+                    Connecte Prometheus et Elasticsearch pour des métriques unifiées.
+                </p>
+                <span class="service-url">{{ grafana_ip }}:3000</span>
+            </a>
+            
+            <!-- Zabbix -->
+            <a href="http://{{ zabbix_ip }}/zabbix" class="service-card" target="_blank">
+                <div class="service-icon">🔔</div>
+                <h3 class="service-name">Zabbix</h3>
+                <p class="service-description">
+                    Système de monitoring et d'alertes avancé.
+                    Détection automatique des problèmes et notifications multi-canaux.
+                </p>
+                <span class="service-url">{{ zabbix_ip }}/zabbix</span>
+            </a>
+            
+            <!-- Node Exporter -->
+            <a href="http://{{ prometheus_ip }}:9100" class="service-card" target="_blank">
+                <div class="service-icon">🖥️</div>
+                <h3 class="service-name">Node Exporter</h3>
+                <p class="service-description">
+                    Exporte les métriques système (CPU, mémoire, disque, réseau).
+                    Utilisé par Prometheus pour collecter les données des serveurs.
+                </p>
+                <span class="service-url">{{ prometheus_ip }}:9100</span>
+            </a>
+        </div>
+        
+        <div class="status-section">
+            <h2>📋 Service Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>Prometheus: {{ prometheus_ip }}</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>Elasticsearch: {{ elasticsearch_ip }}</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>Kibana: {{ elasticsearch_ip }}</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>Grafana: {{ grafana_ip }}</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>Zabbix: {{ zabbix_ip }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Infrastructure Monitoring Portal | 
+            <a href="#">Documentation</a> | 
+            <a href="#">Support</a></p>
+            <p>Réseau: {{ network_cidr }} | Passerelle: {{ gateway }}</p>
+        </div>
+    </div>
+</body>
+</html>

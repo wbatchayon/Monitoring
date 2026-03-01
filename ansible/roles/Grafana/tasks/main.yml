@@ -1,0 +1,112 @@
+---
+# Grafana Installation Tasks
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - wget
+      - gnupg2
+      - apt-transport-https
+      - ca-certificates
+    state: present
+  become: true
+
+- name: Add Grafana GPG key
+  ansible.builtin.apt_key:
+    url: https://packages.grafana.com/gpg.key
+    state: present
+  become: true
+
+- name: Add Grafana repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://packages.grafana.com/oss/deb stable main"
+    state: present
+  become: true
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+
+- name: Install Grafana
+  ansible.builtin.apt:
+    name: grafana
+    state: present
+  become: true
+
+- name: Deploy Grafana configuration
+  ansible.builtin.template:
+    src: grafana.ini.j2
+    dest: /etc/grafana/grafana.ini
+    owner: root
+    group: grafana
+    mode: '0640'
+  become: true
+  notify: Restart Grafana
+
+- name: Create datasources directory
+  ansible.builtin.file:
+    path: /etc/grafana/provisioning/datasources
+    state: directory
+    owner: root
+    group: grafana
+    mode: '0755'
+  become: true
+
+- name: Deploy Prometheus datasource
+  ansible.builtin.template:
+    src: datasources/prometheus.yml.j2
+    dest: /etc/grafana/provisioning/datasources/prometheus.yml
+    owner: root
+    group: grafana
+    mode: '0644'
+  become: true
+  notify: Restart Grafana
+
+- name: Deploy dashboards directory
+  ansible.builtin.file:
+    path: /var/lib/grafana/dashboards
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: '0755'
+  become: true
+
+- name: Deploy dashboards provisioning
+  ansible.builtin.template:
+    src: dashboards/dashboards.yml.j2
+    dest: /etc/grafana/provisioning/dashboards/dashboards.yml
+    owner: root
+    group: grafana
+    mode: '0644'
+  become: true
+
+- name: Enable and start Grafana
+  ansible.builtin.systemd:
+    name: grafana-server
+    enabled: true
+    state: started
+  become: true
+
+- name: Open Grafana port in firewall
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ monitoring_network }}"
+    port: "{{ grafana_port }}"
+    proto: tcp
+  become: true
+  failed_when: false
+
+- name: Wait for Grafana to start
+  ansible.builtin.wait_for:
+    port: "{{ grafana_port }}"
+    delay: 5
+    timeout: 120
+  failed_when: false
