@@ -1,0 +1,12 @@
+---
+# Grafana role default variables
+
+# Network Configuration
+grafana_ip: "192.168.1.112"
+grafana_port: "3000"
+
+# Database
+grafana_database_type: "sqlite3"
+
+# Security - use vault for password
+grafana_admin_password: "{{ vault_grafana_admin_password | default('admin') }}"

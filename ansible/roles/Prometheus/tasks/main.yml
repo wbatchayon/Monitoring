@@ -99,7 +99,7 @@
 
 - name: Wait for Prometheus
   ansible.builtin.uri:
-    url: "http://localhost:{{ prometheus_port }}"
+    url: "http://{{ ansible_host | default('192.168.1.110') }}:{{ prometheus_port | default('9090') }}"
     status_code: 200
   register: result
   until: result.status == 200

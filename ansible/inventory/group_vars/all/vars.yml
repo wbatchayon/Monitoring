@@ -1,6 +1,5 @@
 ---
 # Ansible group variables - Centralized network configuration
-# Include vault for sensitive data: ansible/group_vars/all/vault.yml
 
 # SSH
 ssh_username: "ubuntu"

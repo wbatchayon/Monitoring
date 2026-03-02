@@ -6,3 +6,21 @@
     name: postgresql
     state: restarted
   become: true
+
+- name: Restart Zabbix Server
+  ansible.builtin.systemd:
+    name: zabbix-server
+    state: restarted
+  become: true
+
+- name: Restart Zabbix Agent
+  ansible.builtin.systemd:
+    name: zabbix-agent
+    state: restarted
+  become: true
+
+- name: Restart Zabbix Frontend
+  ansible.builtin.systemd:
+    name: apache2
+    state: restarted
+  become: true

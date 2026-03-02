@@ -6,3 +6,15 @@
     name: elasticsearch
     state: restarted
   become: true
+
+- name: Restart Kibana
+  ansible.builtin.systemd:
+    name: kibana
+    state: restarted
+  become: true
+
+- name: Restart Logstash
+  ansible.builtin.systemd:
+    name: logstash
+    state: restarted
+  become: true

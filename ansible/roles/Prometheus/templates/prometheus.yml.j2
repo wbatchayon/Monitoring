@@ -19,13 +19,13 @@ scrape_configs:
   - job_name: 'prometheus'
     honor_timestamps: true
     static_configs:
-      - targets: ['localhost:{{ prometheus_port }}']
+      - targets: ['{{ prometheus_ip | default("192.168.1.110") }}:9090']
 
   # Node Exporter
   - job_name: 'node'
     honor_timestamps: true
     static_configs:
-      - targets: {{ node_exporter_targets | default(['localhost:9100']) }}
+      - targets: {{ node_exporter_targets_ip | default(['192.168.1.110:9100']) }}
 
   # ELK Stack monitoring
   - job_name: 'elasticsearch'
