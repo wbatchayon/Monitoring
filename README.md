@@ -41,4 +41,4 @@ make deploy-all
 - Mises à jour automatiques
 - Secrets via Ansible Vault
 
-Voir [SECURITY.md](SECURITY.md) pour la politique de sécurité.
+Voir [SECURITY.md](docs/SECURITY.md) pour la politique de sécurité.
